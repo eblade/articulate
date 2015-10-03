@@ -1,4 +1,12 @@
 Feature: parser
+  
+  The parser parses "articulate" code into a set of instructions. Each 
+  intruction has a directive, which can be seen as the identifier of
+  the instruction. Instruction are fairly high-level units and only
+  one instruction may come out of one line.
+
+  # These first tests the parser's ability to parse a single line into
+  # an instruction.
 
   Scenario: Parsing a "require" line
       Given the line require test
@@ -6,6 +14,7 @@ Feature: parser
        Then there should be an instruction
         And the directive should be "require"
         And "module" should be test
+        And the indentation should be 0
 
   Scenario: Parsing a simple "using" line
       Given the line using test
@@ -13,6 +22,7 @@ Feature: parser
        Then there should be an instruction
         And the directive should be "using"
         And "using" should be test
+        And the indentation should be 0
 
   Scenario: Parsing a more realistic "using" line
       Given the line using "cool" parametrized scope
@@ -20,6 +30,7 @@ Feature: parser
        Then there should be an instruction
         And the directive should be "using"
         And "using" should be "cool" parametrized scope
+        And the indentation should be 0
 
   Scenario: Parsing a simple "define" line
       Given the line define test
@@ -27,19 +38,22 @@ Feature: parser
        Then there should be an instruction
         And the directive should be "define"
         And "function" should be test
+        And the indentation should be 0
 
   Scenario: Parsing a more realistic "define" line
-      Given the line define epic function (parameter)
+      Given the line define epic function <parameter>
        When the line is parsed
        Then there should be an instruction
         And the directive should be "define"
-        And "function" should be epic function (parameter)
+        And "function" should be epic function <parameter>
+        And the indentation should be 0
 
   Scenario: Parsing a "given" line
       Given the line given
        When the line is parsed
        Then there should be an instruction
         And the directive should be "given"
+        And the indentation should be 0
 
   Scenario: Parsing a simple "for-in" line
       Given the line for entry in entries
@@ -48,6 +62,7 @@ Feature: parser
         And the directive should be "for-in"
         And "entry" should be entry
         And "list" should be entries
+        And the indentation should be 0
 
   Scenario: Parsing a "for-in" line with a dot
       Given the line for entry in feed.entries
@@ -56,6 +71,7 @@ Feature: parser
         And the directive should be "for-in"
         And "entry" should be entry
         And "list" should be feed.entries
+        And the indentation should be 0
 
   Scenario: Parsing a simple "setting" line
       Given the line x = 5
@@ -64,6 +80,7 @@ Feature: parser
         And the directive should be "set"
         And "target" should be x
         And "expression" should be 5
+        And the indentation should be 0
 
   Scenario: Parsing a complex "setting" line
       Given the line x.y = (5 + (3 - y))/32+2*y
@@ -72,3 +89,82 @@ Feature: parser
         And the directive should be "set"
         And "target" should be x.y
         And "expression" should be (5 + (3 - y))/32+2*y
+        And the indentation should be 0
+
+  Scenario: Parsing a simple "print" line
+      Given the line print test
+       When the line is parsed
+       Then there should be an instruction
+        And the directive should be "print"
+        And "expression" should be test
+        And the indentation should be 0
+
+  Scenario: Parsing a more realistic "print" line
+      Given the line print epic expression == 4
+       When the line is parsed
+       Then there should be an instruction
+        And the directive should be "print"
+        And "expression" should be epic expression == 4
+        And the indentation should be 0
+
+  Scenario Outline: Parsing a line indented with <spaces> spaces
+      Given the line <line>
+        And <spaces> spaces are prepended
+       When the line is parsed
+       Then the indentation should be <indentation>
+        And the directive should be "<directive>"
+
+       Examples: Well indented lines
+           | line                   | spaces | indentation | directive |
+           | require test           | 0      | 0           | require   |
+           | print "hej"            | 4      | 1           | print     |
+           | require http           | 4      | 1           | require   |
+           | using a thing with "q" | 8      | 2           | using     |
+
+  Scenario Outline: Parsing a line indented with <spaces> spaces and <tabs> tabs.
+      Given the line <line>
+        And <tabs> tabs are prepended
+        And <spaces> spaces are prepended
+       When the line is parsed
+       Then it raises a SyntaxError with message "<message>"
+
+       Examples: Badly indented lines
+           | line                   | spaces | tabs | message                                   |
+           | require test           | 1      | 0    | Indentation must be a factor of 4 (was 1) |
+           | print "hej"            | 3      | 0    | Indentation must be a factor of 4 (was 3) |
+           | require http           | 7      | 0    | Indentation must be a factor of 4 (was 7) |
+           | using a thing with "q" | 9      | 0    | Indentation must be a factor of 4 (was 9) |
+           | require http           | 0      | 1    | Indentation must only consist of spaces   |
+           | define function <test> | 1      | 1    | Indentation must only consist of spaces   |
+           | define function <test> | 4      | 2    | Indentation must only consist of spaces   |
+
+  # The following lines test the parsers ability to parse a multi-line fragment
+  # of code into a sequence of instructions.
+
+  Scenario: A set of require instructions
+      Given the following code
+        """
+        require http
+        require test
+        require something
+        """
+       When the code is parsed
+       Then the instruction should be the following
+         | lineno | directive | indentation | module    |
+         | 1      | require   | 0           | http      |
+         | 2      | require   | 0           | test      |
+         | 3      | require   | 0           | something |
+
+  Scenario: Nested using instructions
+      Given the following code
+        """
+        using a thing
+            using another thing
+                using a third thing
+        """
+       When the code is parsed
+       Then the instruction should be the following
+         | lineno | directive | indentation | using         |
+         | 1      | using     | 0           | a thing       |
+         | 2      | using     | 1           | another thing |
+         | 3      | using     | 2           | a third thing |

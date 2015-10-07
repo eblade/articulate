@@ -8,6 +8,11 @@ Feature: parser
   # These first tests the parser's ability to parse a single line into
   # an instruction.
 
+  Scenario: Parsing an empty line
+      Given an empty line
+       When the line is parsed
+       Then there should not be an instruction
+
   Scenario: Parsing a "require" line
       Given the line require test
        When the line is parsed
@@ -154,6 +159,25 @@ Feature: parser
          | 1      | require   | 0           | http      |
          | 2      | require   | 0           | test      |
          | 3      | require   | 0           | something |
+
+  Scenario: A set of require instruction with empty lines in between
+      Given the following code
+        """
+        
+        require http
+
+        require test
+
+
+
+        require something
+        """
+       When the code is parsed
+       Then the instruction should be the following
+         | lineno | directive | indentation | module    |
+         | 2      | require   | 0           | http      |
+         | 4      | require   | 0           | test      |
+         | 8      | require   | 0           | something |
 
   Scenario: Nested using instructions
       Given the following code

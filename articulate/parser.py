@@ -1,3 +1,9 @@
+"""
+Parse a file into instructions, one per line. Indentation is important,
+as it controls scoping.
+"""
+
+
 from parse import parse, compile
 
 INDENTATION = 4
@@ -22,25 +28,41 @@ patterns = [
 ]
 
 class Instruction:
-    def __init__(self, directive, args, indent):
+    def __init__(self, directive, args, indentation):
         self.directive = directive
         self.args = args
-        self.indent = indent
+        self.indentation = indentation
         self.line_number = 0
         self.source_file = None
+        self.instructions = []
+
+    def append(self, instruction):
+        self.instructions.append(instruction)
+
+    def __len__(self):
+        return len(self.instructions)
+
+    def __repr__(self):
+        return '<Instruction %s +%i %s>' % (self.source, self.lineno, self.directive)
+
+    def to_pretty(self, level=0):
+        output = '%s%s\n' % ('.'*level, repr(self))
+        for instruction in self.instructions:
+            output += instruction.to_pretty(level + 1)
+        return output
 
 def parse_line(line):
     line = line.rstrip()
-    indent = _get_indent(line)
+    indentation = _get_indentation(line)
     line = line.lstrip()
     line = _strip_comment(line)
 
     for pattern in patterns:
         r = pattern.parse(line)
         if r is not None:
-            return Instruction(pattern.directive, r.named, indent)
+            return Instruction(pattern.directive, r.named, indentation)
 
-def _get_indent(line):
+def _get_indentation(line):
     spaces = 0
     for c in line:
         if c == ' ':
@@ -60,6 +82,8 @@ def parse_string(string, source=None):
     instructions = []
     for n, line in enumerate(string.split('\n')):
         instruction = parse_line(line)
+        if instruction is None:
+            continue
         instruction.source = source
         instruction.line_number = n + 1
         instructions.append(instruction)

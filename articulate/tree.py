@@ -34,7 +34,7 @@ class Tree:
             self.current.instructions.append(instruction)
 
         else:
-            raise SyntaxError("Bad indentation transition (%i -> %i)"
+            raise SyntaxError("Bad indentation transition (%i -> %i)."
                 % (self.current.indentation + 1, instruction.indentation))
 
         print(self.trace)

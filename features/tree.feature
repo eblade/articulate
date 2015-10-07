@@ -74,7 +74,7 @@ Feature: tree
          | using     | 0           | test1     |
          | using     | 2           | test1.1.1 |
        When the instructions are converted to a tree (expecting trouble)
-       Then it raises a SyntaxError with message "Bad indentation transition (0 -> 2)"
+       Then it raises a SyntaxError with message "Bad indentation transition (0 -> 2)."
 
   Scenario: A badly indented instruction tree 2
       Given a specific sequence of instructions
@@ -83,4 +83,4 @@ Feature: tree
          | using     | 1           | test1.1     |
          | using     | 3           | test1.1.1.1 |
        When the instructions are converted to a tree (expecting trouble)
-       Then it raises a SyntaxError with message "Bad indentation transition (1 -> 3)"
+       Then it raises a SyntaxError with message "Bad indentation transition (1 -> 3)."

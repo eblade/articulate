@@ -1,4 +1,4 @@
-Feature: parser
+Feature: Parsing standard lines
   
   The parser parses "articulate" code into a set of instructions. Each 
   intruction has a directive, which can be seen as the identifier of
@@ -130,65 +130,21 @@ Feature: parser
       Given the line <line>
         And <tabs> tabs are prepended
         And <spaces> spaces are prepended
-       When the line is parsed
+       When the line is parsed (expecting trouble)
        Then it raises a SyntaxError with message "<message>"
 
        Examples: Badly indented lines
            | line                   | spaces | tabs | message                                   |
-           | require test           | 1      | 0    | Indentation must be a factor of 4 (was 1) |
-           | print "hej"            | 3      | 0    | Indentation must be a factor of 4 (was 3) |
-           | require http           | 7      | 0    | Indentation must be a factor of 4 (was 7) |
-           | using a thing with "q" | 9      | 0    | Indentation must be a factor of 4 (was 9) |
-           | require http           | 0      | 1    | Indentation must only consist of spaces   |
-           | define function <test> | 1      | 1    | Indentation must only consist of spaces   |
-           | define function <test> | 4      | 2    | Indentation must only consist of spaces   |
+           | require test           | 1      | 0    | Indentation must be a factor of 4 (was 1).|
+           | print "hej"            | 3      | 0    | Indentation must be a factor of 4 (was 3).|
+           | require http           | 7      | 0    | Indentation must be a factor of 4 (was 7).|
+           | using a thing with "q" | 9      | 0    | Indentation must be a factor of 4 (was 9).|
+           | require http           | 0      | 1    | Indentation must only consist of spaces.  |
+           | define function <test> | 1      | 1    | Indentation must only consist of spaces.  |
+           | define function <test> | 4      | 2    | Indentation must only consist of spaces.  |
 
-  # The following lines test the parsers ability to parse a multi-line fragment
-  # of code into a sequence of instructions.
+  Scenario: A line with scrambled symbols
+      Given the line $^*^"%
+       When the line is parsed (expecting trouble)
+       Then it raises a SyntaxError
 
-  Scenario: A set of require instructions
-      Given the following code
-        """
-        require http
-        require test
-        require something
-        """
-       When the code is parsed
-       Then the instruction should be the following
-         | lineno | directive | indentation | module    |
-         | 1      | require   | 0           | http      |
-         | 2      | require   | 0           | test      |
-         | 3      | require   | 0           | something |
-
-  Scenario: A set of require instruction with empty lines in between
-      Given the following code
-        """
-        
-        require http
-
-        require test
-
-
-
-        require something
-        """
-       When the code is parsed
-       Then the instruction should be the following
-         | lineno | directive | indentation | module    |
-         | 2      | require   | 0           | http      |
-         | 4      | require   | 0           | test      |
-         | 8      | require   | 0           | something |
-
-  Scenario: Nested using instructions
-      Given the following code
-        """
-        using a thing
-            using another thing
-                using a third thing
-        """
-       When the code is parsed
-       Then the instruction should be the following
-         | lineno | directive | indentation | using         |
-         | 1      | using     | 0           | a thing       |
-         | 2      | using     | 1           | another thing |
-         | 3      | using     | 2           | a third thing |

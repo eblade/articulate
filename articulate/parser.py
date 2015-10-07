@@ -57,10 +57,15 @@ def parse_line(line):
     line = line.lstrip()
     line = _strip_comment(line)
 
+    if not line:
+        return None
+
     for pattern in patterns:
         r = pattern.parse(line)
         if r is not None:
             return Instruction(pattern.directive, r.named, indentation)
+
+    raise SyntaxError('Could not parse the line "%s".' % line)
 
 def _get_indentation(line):
     spaces = 0
@@ -68,15 +73,16 @@ def _get_indentation(line):
         if c == ' ':
             spaces += 1
         elif c == '\t':
-            raise SyntaxError("Indentation must only consist of spaces")
+            raise SyntaxError("Indentation must only consist of spaces.")
         else:
             break
     if spaces % INDENTATION != 0:
-        raise SyntaxError("Indentation must be a factor of %i (was %i)" % (INDENTATION, spaces))
+        raise SyntaxError("Indentation must be a factor of %i (was %i)." % (INDENTATION, spaces))
     return spaces / INDENTATION
 
 def _strip_comment(line):
-    return line
+    parts = line.split('#', 1)
+    return parts[0].strip() if len(parts) == 2 else line
 
 def parse_string(string, source=None):
     instructions = []

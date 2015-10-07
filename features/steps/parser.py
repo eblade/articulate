@@ -21,6 +21,10 @@ def step_impl(context, tabs):
     context.line = '\t'*tabs + context.line
 
 @when('the line is parsed')
+def step_impl(context):
+    context.instruction = parse_line(context.line)
+
+@when('the line is parsed (expecting trouble)')
 @catch_all
 def step_impl(context):
     context.instruction = parse_line(context.line)
@@ -32,8 +36,11 @@ def step_impl(context):
 
 @then(u'there should not be an instruction')
 def step_impl(context):
-    assert_that(context.instruction,
-         is_(None))
+    try:
+        assert_that(context.instruction,
+             is_(None))
+    except AttributeError:
+        pass
 
 @then('the directive should be "{directive}"')
 def step_impl(context, directive):

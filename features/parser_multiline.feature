@@ -13,10 +13,10 @@ Feature: Parsing multi-line code
         """
        When the code is parsed
        Then the instructions should be the following
-         | lineno | directive | indentation | module    |
-         | 1      | require   | 0           | http      |
-         | 2      | require   | 0           | test      |
-         | 3      | require   | 0           | something |
+         | line_number | directive | indentation | module    |
+         | 1           | require   | 0           | http      |
+         | 2           | require   | 0           | test      |
+         | 3           | require   | 0           | something |
 
   Scenario: A set of require instruction with empty lines in between
       Given the following code
@@ -32,10 +32,10 @@ Feature: Parsing multi-line code
         """
        When the code is parsed
        Then the instructions should be the following
-         | lineno | directive | indentation | module    |
-         | 2      | require   | 0           | http      |
-         | 4      | require   | 0           | test      |
-         | 8      | require   | 0           | something |
+         | line_number | directive | indentation | module    |
+         | 2           | require   | 0           | http      |
+         | 4           | require   | 0           | test      |
+         | 8           | require   | 0           | something |
 
   Scenario: Nested using instructions
       Given the following code
@@ -46,7 +46,7 @@ Feature: Parsing multi-line code
         """
        When the code is parsed
        Then the instructions should be the following
-         | lineno | directive | indentation | using         |
-         | 1      | using     | 0           | a thing       |
-         | 2      | using     | 1           | another thing |
-         | 3      | using     | 2           | a third thing |
+         | line_number | directive | indentation | using         |
+         | 1           | using     | 0           | a thing       |
+         | 2           | using     | 1           | another thing |
+         | 3           | using     | 2           | a third thing |

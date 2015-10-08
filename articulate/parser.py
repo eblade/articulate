@@ -3,6 +3,7 @@ Parse a file into instructions, one per line. Indentation is important,
 as it controls scoping.
 """
 
+from .instruction import Instruction
 
 from parse import parse, compile
 
@@ -26,30 +27,6 @@ patterns = [
     Pattern('{target} = {expression}', 'set'),
     Pattern('print {expression}', 'print'),
 ]
-
-class Instruction:
-    def __init__(self, directive, arguments, indentation):
-        self.directive = directive
-        self.arguments = arguments
-        self.indentation = indentation
-        self.line_number = 0
-        self.source_file = None
-        self.instructions = []
-
-    def append(self, instruction):
-        self.instructions.append(instruction)
-
-    def __len__(self):
-        return len(self.instructions)
-
-    def __repr__(self):
-        return '<Instruction %s +%i %s>' % (self.source, self.lineno, self.directive)
-
-    def to_pretty(self, level=0):
-        output = '%s%s\n' % ('.'*level, repr(self))
-        for instruction in self.instructions:
-            output += instruction.to_pretty(level + 1)
-        return output
 
 def parse_line(line):
     line = line.rstrip()
@@ -78,7 +55,7 @@ def _get_indentation(line):
             break
     if spaces % INDENTATION != 0:
         raise SyntaxError("Indentation must be a factor of %i (was %i)." % (INDENTATION, spaces))
-    return spaces / INDENTATION
+    return int(spaces / INDENTATION)
 
 def _strip_comment(line):
     parts = line.split('#', 1)

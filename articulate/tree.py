@@ -1,3 +1,10 @@
+from .instruction import Instruction
+
+SCOPING_DIRECTIVES = ('using', 'define', 'nop')
+"""
+Scoping directives are directives which "own" a scope and has a special
+relation to it.
+"""
 
 class Tree:
     """
@@ -5,8 +12,9 @@ class Tree:
     """
 
     def __init__(self, instructions=None):
+        self.directive = 'nop'
         self.indentation = -1
-        self.current = self 
+        self.target = self 
         self.instructions = []
         self.trace = [self]
         if instructions is not None:
@@ -14,31 +22,31 @@ class Tree:
                 self.append(instruction)
 
     def append(self, instruction):
-        print('%i -> %i' % (self.current.indentation, instruction.indentation))
-        if instruction.indentation == self.current.indentation + 1:
-            print('append')
-            self.current.instructions.append(instruction)
+        if instruction.indentation == self.target.indentation + 1:
+            self.target.instructions.append(instruction)
 
-        elif instruction.indentation == self.current.indentation + 2:
-            print('step in, append')
-            self.current = self.current.instructions[-1]
-            self.trace.append(self.current)
-            self.current.instructions.append(instruction)
+        elif instruction.indentation == self.target.indentation + 2:
+            last = self.target.instructions[-1]
+            if last.directive not in SCOPING_DIRECTIVES:
+                nop = Instruction('nop', None, last.indentation)
+                nop.source = last.source
+                nop.line_number = last.line_number
+                self.target.append(nop)
+                last = nop
+            self.target = last
+            self.trace.append(self.target)
+            self.target.instructions.append(instruction)
 
-        elif instruction.indentation <= self.current.indentation:
-            print('step out, append')
+        elif instruction.indentation <= self.target.indentation:
             self.trace = self.trace[:instruction.indentation+1]
-            self.current = self.trace.pop()
+            self.target = self.trace.pop()
             if len(self.trace) == 0:
                 self.trace = [self]
-            self.current.instructions.append(instruction)
+            self.target.instructions.append(instruction)
 
         else:
             raise SyntaxError("Bad indentation transition (%i -> %i)."
-                % (self.current.indentation + 1, instruction.indentation))
-
-        print(self.trace)
-        print(self.to_pretty())
+                % (self.target.indentation + 1, instruction.indentation))
 
     def __len__(self):
         return len(self.instructions)

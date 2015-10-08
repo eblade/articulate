@@ -19,7 +19,7 @@ def step_impl(context):
         directive = arguments.pop('directive')
         indentation = int(arguments.pop('indentation'))
         instruction = Instruction(directive, arguments, indentation)
-        instruction.lineno = n + 1
+        instruction.line_number = n + 1
         instruction.source = 'behave'
         context.instructions.append(instruction)
 
@@ -32,7 +32,7 @@ def step_impl(context):
            equal_to('behave'),
                     'source for instruction %i' % n)
         assert_that(instruction.line_number,
-           equal_to(int(expected.pop('lineno'))),
+           equal_to(int(expected.pop('line_number'))),
                     'line number for instruction %i' % n)
         assert_that(instruction.directive,
            equal_to(expected.pop('directive')),

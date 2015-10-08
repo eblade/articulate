@@ -30,14 +30,14 @@ Feature: tree
          | using     | 1           | test2.1   |
        When the instructions are converted to a tree
        Then the tree should have 2 root instructions
-       Then the tree should look like this
-       """
-       <Instruction behave +1 using>
-       .<Instruction behave +2 using>
-       ..<Instruction behave +3 using>
-       <Instruction behave +4 using>
-       .<Instruction behave +5 using>
-       """
+        And the tree should look like this
+         """
+         <Instruction behave +1 using>
+         .<Instruction behave +2 using>
+         ..<Instruction behave +3 using>
+         <Instruction behave +4 using>
+         .<Instruction behave +5 using>
+         """
 
   Scenario: A more complex 10-instruction tree
       Given a specific sequence of instructions
@@ -54,19 +54,19 @@ Feature: tree
          | using     | 1           | test2.3   |
        When the instructions are converted to a tree
        Then the tree should have 2 root instructions
-       Then the tree should look like this
-       """
-       <Instruction behave +1 using>
-       .<Instruction behave +2 using>
-       ..<Instruction behave +3 using>
-       ..<Instruction behave +4 using>
-       ..<Instruction behave +5 using>
-       <Instruction behave +6 using>
-       .<Instruction behave +7 using>
-       ..<Instruction behave +8 using>
-       .<Instruction behave +9 using>
-       .<Instruction behave +10 using>
-       """
+        And the tree should look like this
+         """
+         <Instruction behave +1 using>
+         .<Instruction behave +2 using>
+         ..<Instruction behave +3 using>
+         ..<Instruction behave +4 using>
+         ..<Instruction behave +5 using>
+         <Instruction behave +6 using>
+         .<Instruction behave +7 using>
+         ..<Instruction behave +8 using>
+         .<Instruction behave +9 using>
+         .<Instruction behave +10 using>
+         """
 
   Scenario: A badly indented instruction tree 1
       Given a specific sequence of instructions
@@ -84,3 +84,26 @@ Feature: tree
          | using     | 3           | test1.1.1.1 |
        When the instructions are converted to a tree (expecting trouble)
        Then it raises a SyntaxError with message "Bad indentation transition (1 -> 3)."
+
+  Scenario: A private scope with no parent instruction
+      Given a specific sequence of instructions
+         | directive | indentation | target | expression |
+         | set       | 0           | x      | 1          |
+         | set       | 1           | y      | 2          |
+         | set       | 2           | z      | 3          |
+         | set       | 0           | v      | 4          |
+         | set       | 1           | w      | 5          |
+       When the instructions are converted to a tree
+       Then the tree should have 4 root instructions
+        And the tree should look like this
+         """
+         <Instruction behave +1 set>
+         <Instruction behave +1 nop>
+         .<Instruction behave +2 set>
+         .<Instruction behave +2 nop>
+         ..<Instruction behave +3 set>
+         <Instruction behave +4 set>
+         <Instruction behave +4 nop>
+         .<Instruction behave +5 set>
+         """
+

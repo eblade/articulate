@@ -1,0 +1,12 @@
+x = "outer"
+print x
+
+    x = "inner"
+    print x
+
+print x
+
+## Output:
+# outer
+# inner
+# outer

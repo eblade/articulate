@@ -49,7 +49,7 @@ def step_impl(context, directive):
 
 @then('"{key}" should be {value}')
 def step_impl(context, key, value):
-    assert_that(context.instruction.args.get(key),
+    assert_that(context.instruction.arguments.get(key),
        equal_to(value))
 
 @then('the indentation should be {indentation:d}')

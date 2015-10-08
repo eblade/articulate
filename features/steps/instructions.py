@@ -3,19 +3,27 @@ from hamcrest import assert_that, equal_to
 
 from articulate.parser import Instruction
 
+@given('a "{directive}" instruction')
+def step_impl(context, directive):
+    context.instruction = Instruction(directive, {}, 0)
+
+@given('the instruction has an argument {argument} = {value}')
+def step_impl(context, argument, value):
+    context.instruction.arguments[argument] = value
+
 @given('a specific sequence of instructions')
 def step_impl(context):
     context.instructions = []
     for n, row in enumerate(context.table):
-        args = {key: row[key] for key in context.table.headings}
-        directive = args.pop('directive')
-        indentation = int(args.pop('indentation'))
-        instruction = Instruction(directive, args, indentation)
+        arguments = {key: row[key] for key in context.table.headings}
+        directive = arguments.pop('directive')
+        indentation = int(arguments.pop('indentation'))
+        instruction = Instruction(directive, arguments, indentation)
         instruction.lineno = n + 1
         instruction.source = 'behave'
         context.instructions.append(instruction)
 
-@then('the instruction should be the following')
+@then('the instructions should be the following')
 def step_impl(context):
     for n, row in enumerate(context.table):
         instruction = context.instructions[n]
@@ -33,6 +41,6 @@ def step_impl(context):
            equal_to(int(expected.pop('indentation'))),
                     'indentation for instruction %i' % n)
         for key, value in expected.items():
-            assert_that(instruction.args.get(key),
+            assert_that(instruction.arguments.get(key),
                equal_to(value),
                         'arg "%s" for instruction %i' % (key, n))

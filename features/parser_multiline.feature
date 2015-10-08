@@ -12,7 +12,7 @@ Feature: Parsing multi-line code
         require something
         """
        When the code is parsed
-       Then the instruction should be the following
+       Then the instructions should be the following
          | lineno | directive | indentation | module    |
          | 1      | require   | 0           | http      |
          | 2      | require   | 0           | test      |
@@ -31,7 +31,7 @@ Feature: Parsing multi-line code
         require something
         """
        When the code is parsed
-       Then the instruction should be the following
+       Then the instructions should be the following
          | lineno | directive | indentation | module    |
          | 2      | require   | 0           | http      |
          | 4      | require   | 0           | test      |
@@ -45,7 +45,7 @@ Feature: Parsing multi-line code
                 using a third thing
         """
        When the code is parsed
-       Then the instruction should be the following
+       Then the instructions should be the following
          | lineno | directive | indentation | using         |
          | 1      | using     | 0           | a thing       |
          | 2      | using     | 1           | another thing |

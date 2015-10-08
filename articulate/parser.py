@@ -28,9 +28,9 @@ patterns = [
 ]
 
 class Instruction:
-    def __init__(self, directive, args, indentation):
+    def __init__(self, directive, arguments, indentation):
         self.directive = directive
-        self.args = args
+        self.arguments = arguments
         self.indentation = indentation
         self.line_number = 0
         self.source_file = None

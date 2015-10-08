@@ -78,7 +78,7 @@ Feature: Parsing standard lines
         And "list" should be feed.entries
         And the indentation should be 0
 
-  Scenario: Parsing a simple "setting" line
+  Scenario: Parsing a simple "set" line
       Given the line x = 5
        When the line is parsed
        Then there should be an instruction

@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+
+from argparse import ArgumentParser
+
+from articulate.parser import parse_string
+from articulate.vm import Evaluator
+
+
+# Options
+parser = ArgumentParser(usage="articulate")
+parser.add_argument('source',
+    help='source file')
+
+args = parser.parse_args()
+
+with open(args.source, 'r') as f:
+    source = f.read()
+
+instructions = parse_string(source)
+
+evaluator = Evaluator()
+
+for instruction in instructions:
+    evaluator.evaluate(instruction)

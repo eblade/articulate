@@ -36,7 +36,7 @@ if args.tree:
     print(tree.to_pretty())
     sys.exit(0)
 
-print("START EVALUATE")
+#print("START EVALUATE")
 scope = Scope()
 for instruction in tree.instructions:
     evaluate(instruction, scope)

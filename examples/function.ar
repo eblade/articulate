@@ -1,0 +1,7 @@
+define my function of <x:int> and <y:int>
+    return 3 * x - y
+
+print my function of 7 and 1
+
+## Output
+# 20

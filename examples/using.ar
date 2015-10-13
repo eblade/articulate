@@ -1,0 +1,12 @@
+x = 3
+
+define a place where x is ten times <x:int>
+    x = x * 10
+    y = x * 1000
+    expose x, y
+
+x = 10
+
+using a place where x is ten times 5
+    print x
+    print y

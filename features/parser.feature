@@ -26,7 +26,7 @@ Feature: Parsing standard lines
        When the line is parsed
        Then there should be an instruction
         And the directive should be "using"
-        And "using" should be test
+        And "function" should be test
         And the indentation should be 0
 
   Scenario: Parsing a more realistic "using" line
@@ -34,7 +34,7 @@ Feature: Parsing standard lines
        When the line is parsed
        Then there should be an instruction
         And the directive should be "using"
-        And "using" should be "cool" parametrized scope
+        And "function" should be "cool" parametrized scope
         And the indentation should be 0
 
   Scenario: Parsing a simple "define" line

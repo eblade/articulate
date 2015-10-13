@@ -46,7 +46,7 @@ Feature: Parsing multi-line code
         """
        When the code is parsed
        Then the instructions should be the following
-         | line_number | directive | indentation | using         |
+         | line_number | directive | indentation | function      |
          | 1           | using     | 0           | a thing       |
          | 2           | using     | 1           | another thing |
          | 3           | using     | 2           | a third thing |

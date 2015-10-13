@@ -6,6 +6,8 @@ from articulate.parser import Instruction
 @given('a "{directive}" instruction')
 def step_impl(context, directive):
     context.instruction = Instruction(directive, {}, 0)
+    context.instruction.line_number = 0
+    context.instruction.source = 'behave'
 
 @given('the instruction has an argument {argument} = {value}')
 def step_impl(context, argument, value):

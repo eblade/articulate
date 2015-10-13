@@ -24,4 +24,4 @@ Feature: Variable substitution and parenthesis matching
         And an expression (x+1 - (x+3)*(x+2)) + ((x * 4))
         And the normal resolver is used
        When the expression is substituted
-       Then the expression should be 1 + 1
+       Then the expression should be x+1 - 45*44 + 168

@@ -18,19 +18,19 @@ Feature: Defining and calling functions
   
   Scenario: Defining a simple function
       Given a specific sequence of instructions
-         | directive | indentation | define                      | expression |
-         | define    | 0           | {x:d} to the power of {y:d} |            |
-         | return    | 1           |                             | x ** y     |
+         | directive | indentation | function                        | expression |
+         | define    | 0           | <x:int> to the power of <y:int> |            |
+         | return    | 1           |                                 | x ** y     |
        When the instructions are converted to a tree
         And the tree is fed to the VM
-       Then there should be a function called {x:d} to the power of {y:d}
+       Then there should be a function called <x:int> to the power of <y:int>
 
   Scenario: Defining a simple function and calling it with numbers
       Given a specific sequence of instructions
-         | directive | indentation | define                      | expression          | target |
-         | define    | 0           | {x:d} to the power of {y:d} |                     |        |
-         | return    | 1           |                             | x ** y              |        |
-         | set       | 0           |                             | 2 to the power of 3 | z      |
+         | directive | indentation | function                        | expression          | target |
+         | define    | 0           | <x:int> to the power of <y:int> |                     |        |
+         | return    | 1           |                                 | x ** y              |        |
+         | set       | 0           |                                 | 2 to the power of 3 | z      |
        When the instructions are converted to a tree
         And the tree is fed to the VM
        Then the variable "z" should have the value 8
@@ -39,12 +39,12 @@ Feature: Defining and calling functions
 
   Scenario: Defining a simple function and calling it with variables
       Given a specific sequence of instructions
-         | directive | indentation | define                      | expression              | target |
-         | define    | 0           | {x:d} to the power of {y:d} |                         |        |
-         | return    | 1           |                             | x ** y                  |        |
-         | set       | 0           |                             | 4                       | a      |
-         | set       | 0           |                             | 2                       | b      |
-         | set       | 0           |                             | :a to the power of :b   | z      |
+         | directive | indentation | function                        | expression              | target |
+         | define    | 0           | <x:int> to the power of <y:int> |                         |        |
+         | return    | 1           |                                 | x ** y                  |        |
+         | set       | 0           |                                 | 4                       | a      |
+         | set       | 0           |                                 | 2                       | b      |
+         | set       | 0           |                                 | :a to the power of :b   | z      |
        When the instructions are converted to a tree
         And the tree is fed to the VM
        Then the variable "a" should have the value 4
@@ -56,10 +56,10 @@ Feature: Defining and calling functions
   Scenario: A recursive fibonacci function
       Given the following code
         """
-        define fibonacci number {x:d}
+        define fibonacci number <x:int>
             if x in (1, 2)
                 return 1
-            return <fibonacci number <x-2>> + <fibonacci number <x-1>>
+            return (fibonacci number (x-2)) + (fibonacci number (x-1))
 
         f1 = fibonacci number 1
         f2 = fibonacci number 2

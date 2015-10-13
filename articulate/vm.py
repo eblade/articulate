@@ -5,6 +5,7 @@ This is the Virtual Machine that holds the evaluation loop.
 from .scope import Scope
 
 DEBUG = False
+#DEBUG = True
 
 def printi(recursion, *parts):
     if DEBUG: print('    '*recursion, *parts)
@@ -21,6 +22,8 @@ def evaluate(instruction, scope, recursion=0):
     directive = instruction.directive
     function = None
     jump = False
+    using = False
+    exposed = None
 
     if directive == 'print':
         result = resolve(instruction.arguments['expression'], scope, recursion + 1)
@@ -33,6 +36,14 @@ def evaluate(instruction, scope, recursion=0):
 
     elif directive == 'define':
         function = scope.define(instruction.arguments['function'])
+
+    elif directive == 'using':
+        exposed = resolve(instruction.arguments['function'], scope, recursion + 1, using=True)
+        using = True
+
+    elif directive == 'expose':
+        for name in instruction.arguments['names'].split(','):
+            scope.expose(name)
 
     elif directive == 'return':
         result = resolve(instruction.arguments['expression'], scope, recursion + 1)
@@ -63,6 +74,8 @@ def evaluate(instruction, scope, recursion=0):
     # Handle scoping
     if not jump and len(instruction.instructions) > 0:
         sub_scope = scope.copy()
+        if using:
+            sub_scope.update(exposed)
         result = step_in(instruction, sub_scope, recursion)
         if sub_scope.returning:
             printi(recursion, "ReturningE: ", result)
@@ -83,7 +96,7 @@ def step_in(instruction, scope, recursion=0):
     return None
 
 
-def resolve(expression, scope, recursion=0):
+def resolve(expression, scope, recursion=0, using=False):
     printi(recursion, "***resolve", expression)
 
     # First, try substitution
@@ -91,23 +104,40 @@ def resolve(expression, scope, recursion=0):
     printi(recursion, "Resolve after substitution:", expression)
 
     # Then, try with the function we have in the scope
-    #printi(recursion, "Available functions:", list(scope.functions.values()))
     for function in scope.functions.values():
         printi(recursion, "Testing function:", function.pattern, function._expanded)
-        r = function.parse(expression)
-        if r is not None:
-            printi(recursion, "Going in")
-            sub_scope = scope.copy()
-            sub_scope.update(r.named)
+        result, expansion = function.parse(expression)
+        if result is not None:
+            printi(recursion, "Going in", expansion, expansion.parameters)
+
+            # Copying scope
+            sub_scope = Scope()
+            sub_scope.functions = function.functions.copy()
+            sub_scope.update(result.named)
+            for parameter in expansion.parameters.values():
+                if parameter.referenced:
+                    printi(recursion, "Dereferencing", parameter.name)
+                    sub_scope[parameter.name] = scope[result.named[parameter.name]]
             printi(recursion, 'Scope:', {k: v for k, v in sub_scope.items() if not k.startswith('_')})
+
+            # Running sub-instructions
             for instruction in function.instructions:
                 printi(recursion, "Instruction", instruction)
                 result = evaluate(instruction, sub_scope, recursion + 1)
                 if sub_scope.returning:
+                    if using:
+                        raise RuntimeError('Return not allowed in using function.')
                     printi(recursion, "ReturningR: ", result)
                     scope.returning = True
                     return result
-            raise RuntimeError('Function without return.')
+
+            if using:
+                return sub_scope.exposed
+            else:
+                raise RuntimeError('Function without return.')
+
+    if using:
+        raise RuntimeError("Using block must use a function")
 
     # Then, let python evaluate
     printi(recursion, "Eval:", expression)

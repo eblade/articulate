@@ -24,7 +24,7 @@ Feature: Expression resolver of the VM
   Scenario: Resolving a function with an explicit number
       Given the following code
         """
-        define my function of <int:x>
+        define my function of <x:int>
             return 3 * x
 
         y = 7
@@ -40,7 +40,7 @@ Feature: Expression resolver of the VM
   Scenario: Resolving a function with an implicit number
       Given the following code
         """
-        define my function of <int:x>
+        define my function of <x:int>
             return 3 * x
 
         y = 7
@@ -56,7 +56,7 @@ Feature: Expression resolver of the VM
   Scenario: Resolving a function with with a call to itself as argument
       Given the following code
         """
-        define my function of <int:x>
+        define my function of <x:int>
             return 3 * x
 
         y = 7

@@ -1,6 +1,6 @@
 from .instruction import Instruction
 
-SCOPING_DIRECTIVES = ('using', 'define', 'nop')
+SCOPING_DIRECTIVES = ('using', 'define', 'nop', 'if', 'for-in')
 """
 Scoping directives are directives which "own" a scope and has a special
 relation to it.

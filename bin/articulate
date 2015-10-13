@@ -5,7 +5,8 @@ from argparse import ArgumentParser
 
 from articulate.parser import parse_string
 from articulate.tree import Tree
-from articulate.vm import Evaluator
+from articulate.vm import evaluate
+from articulate.scope import Scope
 
 
 # Options
@@ -35,7 +36,7 @@ if args.tree:
     print(tree.to_pretty())
     sys.exit(0)
 
-evaluator = Evaluator()
-
+print("START EVALUATE")
+scope = Scope()
 for instruction in tree.instructions:
-    evaluator.evaluate(instruction)
+    evaluate(instruction, scope)

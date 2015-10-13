@@ -1,0 +1,17 @@
+define fibonacci number <x:int>
+    if x in [1, 2]
+        return 1
+    return (fibonacci number (x-2)) + (fibonacci number (x-1))
+
+print fibonacci number 1
+print fibonacci number 2
+print fibonacci number 3
+print fibonacci number 4
+print fibonacci number 5
+
+## Output
+# 1
+# 1
+# 2
+# 3
+# 5

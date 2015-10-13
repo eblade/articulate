@@ -46,11 +46,19 @@ Feature: Parsing standard lines
         And the indentation should be 0
 
   Scenario: Parsing a more realistic "define" line
-      Given the line define epic function <parameter>
+      Given the line define epic function {parameter}
        When the line is parsed
        Then there should be an instruction
         And the directive should be "define"
-        And "function" should be epic function <parameter>
+        And "function" should be epic function {parameter}
+        And the indentation should be 0
+
+  Scenario: Parsing a more realistic "define" line with integer input
+      Given the line define epic function {parameter:d}
+       When the line is parsed
+       Then there should be an instruction
+        And the directive should be "define"
+        And "function" should be epic function {parameter:d}
         And the indentation should be 0
 
   Scenario: Parsing a "given" line
@@ -112,6 +120,22 @@ Feature: Parsing standard lines
         And "expression" should be epic expression == 4
         And the indentation should be 0
 
+  Scenario: Parsing a simple "if" line
+      Given the line if test
+       When the line is parsed
+       Then there should be an instruction
+        And the directive should be "if"
+        And "expression" should be test
+        And the indentation should be 0
+
+  Scenario: Parsing a more realistic "if" line
+      Given the line if (x + 4) > 3
+       When the line is parsed
+       Then there should be an instruction
+        And the directive should be "if"
+        And "expression" should be (x + 4) > 3
+        And the indentation should be 0
+
   Scenario Outline: Parsing a line indented with <spaces> spaces
       Given the line <line>
         And <spaces> spaces are prepended
@@ -145,6 +169,6 @@ Feature: Parsing standard lines
 
   Scenario: A line with scrambled symbols
       Given the line $^*^"%
-       When the line is parsed (expecting trouble)
-       Then it raises a SyntaxError
+       When the line is parsed
+       Then the directive should be "void"
 

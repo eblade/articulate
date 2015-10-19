@@ -3,7 +3,7 @@ from hamcrest import assert_that, equal_to, has_key, not_, is_
 from mock import Mock
 from io import StringIO
 
-from articulate.vm import evaluate, resolve, substitute
+from articulate.vm import evaluate, resolve, substitute, DEBUG
 from articulate.scope import Scope
 from articulate.redirect import redirector
 

@@ -39,6 +39,7 @@ class Expansion:
 class Pattern:
     def __init__(self, pattern, directive):
         self.pattern = pattern
+        self.types = {}
         self.expand()
         #print("Pattern:", pattern, self._expanded)
         self._p = [compile(expansion.pattern) for expansion in self._expanded]
@@ -55,6 +56,11 @@ class Pattern:
             if result:
                 return result, expansion
         return None, None
+
+    def retype(self, scope):
+        for name, type in self.types.items():
+            scope[name] = type(scope[name])
+        return scope
 
     def expand(self):
         self._expanded = []
@@ -78,6 +84,7 @@ class Pattern:
             if type == 'str':
                 templates.append(Parameter(name, '"{' + name + '}"', type, False))
             elif type in parse_type_map.keys():
+                self.types[name] = eval(type)
                 templates.append(Parameter(name, '{' + name + parse_type_map.get(type, '') + '}', type, False))
             templates.append(Parameter(name, ':{' + name + '}', type, True))
             all_templates[pointer] = templates

@@ -7,6 +7,8 @@ define a place where x is ten times <x:int>
 
 x = 10
 
-using a place where x is ten times 5
+using a place where x is ten times :x
     print x
     print y
+
+print x

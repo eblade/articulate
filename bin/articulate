@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 
 from articulate.parser import parse_string
 from articulate.tree import Tree
-from articulate.vm import evaluate
+from articulate.vm import evaluate, DEBUG
 from articulate.scope import Scope
 
 
@@ -15,10 +15,15 @@ parser.add_argument('--dis', action="store_true",
     help="print instruction sequence and quit")
 parser.add_argument('--tree', action="store_true",
     help="print instruction tree and quit")
+parser.add_argument('--debug-vm', action="store_true",
+    help="print VM debugging information")
 parser.add_argument('source',
     help='source file')
 
 args = parser.parse_args()
+
+if args.debug_vm:
+   DEBUG(True) 
 
 with open(args.source, 'r') as f:
     source = f.read()

@@ -3,12 +3,14 @@ This is the Virtual Machine that holds the evaluation loop.
 """
 
 from .scope import Scope
+from .require import require
 
-DEBUG = False
-#DEBUG = True
+def DEBUG(value=True):
+    DEBUG.ON = value
+DEBUG.ON = False
 
 def printi(recursion, *parts):
-    if DEBUG: print('    '*recursion, *parts)
+    if DEBUG.ON: print('    '*recursion, *parts)
 
 
 def evaluate(instruction, scope, recursion=0):
@@ -29,10 +31,18 @@ def evaluate(instruction, scope, recursion=0):
         result = resolve(instruction.arguments['expression'], scope, recursion + 1)
         print(result)
 
+    elif directive == 'require':
+        require(instruction.arguments['module'], scope, evaluate)
+
     elif directive == 'set':
         target = instruction.arguments['target']
         result = resolve(instruction.arguments['expression'], scope, recursion + 1)
         scope[target] = result
+        scope.returning = False
+
+    elif directive == 'void':
+        resolve(instruction.arguments['expression'], scope, recursion + 1)
+        scope.returning = False
 
     elif directive == 'define':
         function = scope.define(instruction.arguments['function'])
@@ -76,6 +86,8 @@ def evaluate(instruction, scope, recursion=0):
         sub_scope = scope.copy()
         if using:
             sub_scope.update(exposed)
+            if isinstance(exposed, Scope):
+                sub_scope.functions.update(exposed.functions)
         result = step_in(instruction, sub_scope, recursion)
         if sub_scope.returning:
             printi(recursion, "ReturningE: ", result)
@@ -104,40 +116,80 @@ def resolve(expression, scope, recursion=0, using=False):
     printi(recursion, "Resolve after substitution:", expression)
 
     # Then, try with the function we have in the scope
+    printi(recursion, "Available functions:", scope.functions)
     for function in scope.functions.values():
+        printi(recursion, "Scope:", {k: v for k,v in scope.items() if not k.startswith('_')})
         printi(recursion, "Testing function:", function.pattern, function._expanded)
         result, expansion = function.parse(expression)
         if result is not None:
             printi(recursion, "Going in", expansion, expansion.parameters)
+            
+            exposed = None
 
-            # Copying scope
-            sub_scope = Scope()
-            sub_scope.functions = function.functions.copy()
-            sub_scope.update(result.named)
-            for parameter in expansion.parameters.values():
-                if parameter.referenced:
-                    printi(recursion, "Dereferencing", parameter.name)
-                    sub_scope[parameter.name] = scope[result.named[parameter.name]]
-            printi(recursion, 'Scope:', {k: v for k, v in sub_scope.items() if not k.startswith('_')})
+            # If this is an articulate function 
+            if hasattr(function, 'instructions'):
+                printi(recursion, "Went in", expansion, expansion.parameters)
 
-            # Running sub-instructions
-            for instruction in function.instructions:
-                printi(recursion, "Instruction", instruction)
-                result = evaluate(instruction, sub_scope, recursion + 1)
-                if sub_scope.returning:
-                    if using:
-                        raise RuntimeError('Return not allowed in using function.')
-                    printi(recursion, "ReturningR: ", result)
+                # Copying scope
+                sub_scope = Scope()
+                sub_scope.functions = function.functions.copy()
+                printi(recursion, "Named:", result.named)
+                sub_scope.update(result.named)
+                printi(recursion, "Scope:", {k: v for k,v in sub_scope.items() if not k.startswith('_')})
+                for parameter in expansion.parameters.values():
+                    if parameter.referenced:
+                        printi(recursion, "Dereferencing", parameter.name)
+                        sub_scope[parameter.name] = scope[result.named[parameter.name]]
+                function.retype(sub_scope)
+
+                # Running sub-instructions
+                printi(recursion, 'Scope:', {k: v for k, v in sub_scope.items() if not k.startswith('_')})
+                for instruction in function.instructions:
+                    printi(recursion, "Instruction", instruction)
+                    result = evaluate(instruction, sub_scope, recursion + 1)
+                    if sub_scope.returning:
+                        if using:
+                            raise RuntimeError('Return not allowed in using function.')
+                        printi(recursion, "ReturningR: ", result)
+                        scope.returning = True
+                        return result
+
+                if using:
+                    exposed = sub_scope.exposed
+
+            # Running attached python function/object otherwise
+            elif hasattr(function, 'python_class') or hasattr(function, 'python_method') or hasattr(function, 'python_function'):
+                sub_scope = Scope()
+                sub_scope.update(result.named)
+                if hasattr(function, 'python_method'):
+                    sub_scope['self'] = scope['self']
+                for parameter in expansion.parameters.values():
+                    if parameter.referenced:
+                        printi(recursion, "Dereferencing", parameter.name)
+                        sub_scope[parameter.name] = scope[result.named[parameter.name]]
+                function.retype(sub_scope)
+                printi(recursion, "Scope:", sub_scope)
+                if using:
+                    printi(recursion, "Using:", function)
+                    python_object = function.run(function.retype(sub_scope))
+                    exposed = Scope(python_object.__expose__())
+                    exposed.functions = function.functions
+                    exposed['self'] = python_object
+                    printi(recursion, "Expose:", exposed, exposed.functions)
+                else:
+                    printi(recursion, "Function:", function)
                     scope.returning = True
-                    return result
+                    return function.run(sub_scope)
 
             if using:
-                return sub_scope.exposed
+                if exposed is None:
+                    raise RuntimeError('Using block did not expose.')
+                return exposed
             else:
                 raise RuntimeError('Function without return.')
 
     if using:
-        raise RuntimeError("Using block must use a function")
+        raise RuntimeError("Using block must use a function.")
 
     # Then, let python evaluate
     printi(recursion, "Eval:", expression)

@@ -69,3 +69,19 @@ Feature: Expression resolver of the VM
        Then the result should have the value 63
         And the result should be an integer
        
+  Scenario: Resolving a function with a mixed expression
+      Given the following code
+        """
+        define my function of <x:int>
+            return 3 * x
+
+        y = 7
+        """
+        And an expression my function of ((my function of :y) + 5)
+       When the code is parsed
+        And the instructions are converted to a tree
+        And the tree is fed to the VM
+        And the expression is resolved
+       Then the result should have the value 78 
+        And the result should be an integer
+       

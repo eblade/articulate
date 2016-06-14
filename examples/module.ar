@@ -1,0 +1,10 @@
+# This module can be required by another module
+
+define foo of <x:int>
+    return x * 2
+
+define bar of <x:int>
+    return x * 3
+
+define baz of <x:int>
+    return x * 4

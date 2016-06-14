@@ -1,0 +1,12 @@
+require examples.vizone client
+
+server = "onedev162.se.vizrt.internal"
+username = "user"
+password = "user"
+
+using a Viz One client for :server
+    authenticate with :username and :password
+    asset = create asset "test"
+
+    if :asset is ok
+        print asset.title

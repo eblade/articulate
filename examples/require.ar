@@ -1,0 +1,12 @@
+require examples.module
+require examples.python_module
+
+x = foo of 5
+print x
+
+y = python function of 15
+print y
+
+using a place where x is half of 9.0
+    using a place where x is half of :x
+        print x

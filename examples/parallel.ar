@@ -1,0 +1,7 @@
+require threads
+
+indata = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+using threads
+    define execute <x:int>
+        print "Hej %i" % x

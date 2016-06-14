@@ -1,0 +1,11 @@
+require http session
+
+server = "http://192.168.1.121:8080"
+username = "johan"
+password = "johan"
+
+using an http session for :server
+    authenticate with :username and :password
+    response = GET "/user/me"
+    print response
+    print response.content

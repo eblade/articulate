@@ -19,6 +19,7 @@ def require(module_path, scope, evaluate):
      * Artiulate module files ending with .ar
      * Python module files ending with .py
     """
+    module_path = module_path.replace(' ', '_')
     parts = tuple(module_path.split('.'))
     
     file_path = None
@@ -54,9 +55,10 @@ def require(module_path, scope, evaluate):
         module = loader.load_module()
 
         # Import all defined functions into the scope
-        for name, obj in module.__dict__.items():
+        for name in dir(module):
             if name.startswith('_'):
                 continue
+            obj = getattr(module, name)
             if not hasattr(obj, '__pattern__'):
                 continue
 

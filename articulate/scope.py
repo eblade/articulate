@@ -84,9 +84,10 @@ class PythonClass(Pattern):
 
         # Import all defined methods
         self.functions = {}
-        for name, obj in python_class.__dict__.items():
+        for name in dir(python_class):
             if name.startswith('_'):
                 continue
+            obj = getattr(python_class, name)
             if not hasattr(obj, '__pattern__'):
                 continue
             
